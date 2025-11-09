@@ -1,14 +1,7 @@
 /*
 Theme Name: doAnCMS
-Theme URI: http://localhost/doAnCMS
-Author: Your Name
-Author URI: http://localhost
-Description: Custom WordPress theme for organic shop
+Author: Nhom1
 Version: 1.0
-License: GNU General Public License v2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: doAnCMS
-Tags: custom, ecommerce, organic
 */
 * {
     margin: 0;
@@ -361,3 +354,5 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+

@@ -21,6 +21,47 @@ echo do_shortcode('[smartslider3 slider="3"]');
 </div>
 
 <div class="container">
+
+    <div class="category-grid"> <?php
+        $args = [
+            'taxonomy'   => 'product_cat',
+            'orderby'    => 'name',
+            'parent'     => 0, // Chỉ lấy danh mục cha
+            'hide_empty' => false // Bro có thể đổi thành true nếu muốn ẩn danh mục trống
+        ];
+
+        // Lấy tất cả danh mục sản phẩm
+        $product_categories = get_terms($args);
+
+        if ( ! empty($product_categories) && ! is_wp_error($product_categories) ) {
+            foreach ($product_categories as $category) {
+                // Lấy ảnh thumbnail của danh mục
+                $thumbnail_id = get_term_meta($category->term_id, 'thumbnail_id', true);
+                $image_url = wp_get_attachment_url($thumbnail_id);
+                // Nếu không có ảnh, dùng placeholder
+                if ( ! $image_url ) {
+                    $image_url = wc_placeholder_img_src(); // Lấy ảnh placeholder của WC
+                }
+
+                // Lấy link của danh mục
+                $category_link = get_term_link($category);
+                ?>
+                
+                <a href="<?php echo esc_url($category_link); ?>" class="category-card">
+                    <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($category->name); ?>" class="category-image">
+                    <h3 class="category-name"><?php echo esc_html($category->name); ?></h3>
+                </a>
+
+                <?php
+            }
+        }
+        ?>
+    </div>
+</div>  
+    </div>
+
+
+<div class="container">
     <h2 class="section-title">Sản phẩm nổi bật</h2>
     <div class="product-grid">
         <?php
@@ -68,116 +109,37 @@ endif;
     </div>
 </div>
 
-<div class="container">
-    <h2 class="section-title">Sản phẩm hữu cơ</h2> 
-    
-    <div class="product-grid">
-        <?php
-        $args_huu_co = [ // Đặt tên biến khác đi để không bị đụng
-            'post_type'      => 'product',
-            'posts_per_page' => 5,
-            
-            // 2. LỌC CHÍNH XÁC DANH MỤC "SẢN PHẨM HỮU CƠ"
-            'tax_query'      => [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'slug',
-                    'terms'    => 'san-pham-huu-co' // <-- NHỚ KIỂM TRA LẠI SLUG NÀY
-                ]
-            ]
-        ];
+<?php
+// Tạo một mảng chứa tất cả các mục mà bro muốn hiển thị
+$product_sections = [
+    [
+        'title' => 'Sản phẩm hữu cơ',
+        'slug'  => 'san-pham-huu-co'
+    ],
+    [
+        'title' => 'Ngũ cốc dinh dưỡng hữu cơ',
+        'slug'  => 'ngu-coc-dinh-duong-huu-co'
+    ],
+    [
+        'title' => 'Các loại hạt và đậu hữu cơ',
+        'slug'  => 'dau-va-hat-huu-co'
+    ],
+    [
+        'title' => 'Nui và mì hữu cơ',
+        'slug'  => 'nui-mi-huu-co'
+    ],
+    [
+        'title' => 'Các loại thực phầm hữu cơ',
+        'slug'  => 'thuc-pham-huu-co'
+    ]
+    // Thêm bao nhiêu mục tùy thích...
+];
 
-        // Dùng biến mới $args_huu_co
-        $products_huu_co = new WP_Query($args_huu_co);
-
-        // Dùng vòng lặp với biến mới $products_huu_co
-        if ($products_huu_co->have_posts()) :
-            while ($products_huu_co->have_posts()) : $products_huu_co->the_post();
-            
-                global $product;
-                
-                if ( ! is_a( $product, 'WC_Product' ) ) {
-                    continue; 
-                }
-        ?>
-
-                <div class="product-card">
-                    <?php if (has_post_thumbnail()) : ?>
-                        <?php the_post_thumbnail('medium', ['class' => 'product-image']); ?>
-                    <?php endif; ?>
-                    <div class="product-info">
-                        <div class="product-name"><?php the_title(); ?></div>
-
-                        <div class="product-price">
-                            <?php echo $product->get_price_html(); ?>
-                        </div>
-
-                    </div>
-                </div>
-
-        <?php
-            endwhile;
-            wp_reset_postdata();
-        endif;
-        ?>
-    </div>
-</div>
-
-<div class="container">
-    <h2 class="section-title">Ngũ cốc dinh dưỡng hữu cơ</h2> 
-    
-    <div class="product-grid">
-        <?php
-        $args_ngu_coc_huu_co = [ // Đặt tên biến khác đi để không bị đụng
-            'post_type'      => 'product',
-            'posts_per_page' => 5,
-            
-            // 2. LỌC CHÍNH XÁC DANH MỤC "SẢN PHẨM HỮU CƠ"
-            'tax_query'      => [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'slug',
-                    'terms'    => 'ngu-coc-dinh-duong-huu-co' // <-- NHỚ KIỂM TRA LẠI SLUG NÀY
-                ]
-            ]
-        ];
-
-        // Dùng biến mới $args_huu_co
-        $products_ngu_coc_huu_co = new WP_Query($args_ngu_coc_huu_co);
-
-        // Dùng vòng lặp với biến mới $products_huu_co
-        if ($products_ngu_coc_huu_co->have_posts()) :
-            while ($products_ngu_coc_huu_co->have_posts()) : $products_ngu_coc_huu_co->the_post();
-            
-                global $product;
-                
-                if ( ! is_a( $product, 'WC_Product' ) ) {
-                    continue; 
-                }
-        ?>
-
-                <div class="product-card">
-                    <?php if (has_post_thumbnail()) : ?>
-                        <?php the_post_thumbnail('medium', ['class' => 'product-image']); ?>
-                    <?php endif; ?>
-                    <div class="product-info">
-                        <div class="product-name"><?php the_title(); ?></div>
-
-                        <div class="product-price">
-                            <?php echo $product->get_price_html(); ?>
-                        </div>
-
-                    </div>
-                </div>
-
-        <?php
-            endwhile;
-            wp_reset_postdata();
-        endif;
-        ?>
-    </div>
-</div>
-
+// Dùng vòng lặp để gọi template part cho mỗi mục
+foreach ($product_sections as $section) {
+    get_template_part('template-parts/product-row', null, $section);
+}
+?>
 
 
 <?php get_footer(); ?>

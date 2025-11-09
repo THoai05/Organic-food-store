@@ -4,42 +4,58 @@
 // Load CSS cho theme (ĐÃ SỬA)
 // =======================
 function doAnCMS_enqueue_styles() {
-    
-    // 1. Tải file CSS NỀN (style.css)
-    // File này sẽ được tải trên MỌI TRANG
-    // Nó nên chứa các style chung như header, footer, body...
+    // Base CSS luôn load
     wp_enqueue_style(
-        'doAnCMS-base-style',       // Đặt tên
-        get_stylesheet_uri(),       // Hàm này tự động tìm "style.css"
-        array(),                    // Không phụ thuộc file nào
-        '1.0.1'                     // Đổi số version để xóa cache
+        'doAnCMS-base-style',
+        get_stylesheet_uri(),
+        array(),
+        '1.0.1'
     );
 
-    // 2. Tải file CSS cho TRANG DANH MỤC
-    // Nó CHỈ tải khi bro ở trang danh mục sản phẩm
+    // Category CSS
     if ( is_tax('product_cat') ) {
         wp_enqueue_style(
-            'doAnCMS-category-style',   // Đặt tên riêng
-            get_template_directory_uri() . '/category.css', // Đường dẫn tới file
-            array('doAnCMS-base-style'), // Báo nó phụ thuộc file base
-            '1.0.1'                      // Version
+            'doAnCMS-category-style',
+            get_template_directory_uri() . '/category.css',
+            array('doAnCMS-base-style'),
+            '1.0.1'
         );
     }
 
-    // 3. (Tùy chọn) Tải file CSS riêng cho TRANG CHỦ
-    // Nó CHỈ tải khi bro ở trang chủ
-    // if ( is_front_page() ) {
-    //     wp_enqueue_style(
-    //         'doAnCMS-front-page-style',
-    //         get_template_directory_uri() . '/front-page.css', // Ví dụ tên file là front-page.css
-    //         array('doAnCMS-base-style'),
-    //         '1.0.1'
-    //     );
-    // }
+    // Front page CSS
+    if ( is_front_page() ) {
+        wp_enqueue_style(
+            'doAnCMS-front-page-style',
+            get_template_directory_uri() . '/front-page.css',
+            array('doAnCMS-base-style'),
+            '1.0.1'
+        );
+    }
 
+    // Product detail page CSS (WooCommerce single product)
+    if ( is_singular('product') ) {
+        wp_enqueue_style(
+            'doAnCMS-product-detail-style',
+            get_stylesheet_directory_uri() . '/product-detail.css',
+            array('doAnCMS-base-style'),
+            '1.0.1'
+        );
+    }
 }
 add_action('wp_enqueue_scripts', 'doAnCMS_enqueue_styles');
 
+function doAnCMS_change_related_products_args( $args ) {
+    
+    // 1. Yêu cầu lấy 5 sản phẩm
+    $args['posts_per_page'] = 5;
+    
+    // 2. Báo cho WooCommerce biết là mình sẽ chia 5 cột
+    // (Để nó thêm class 'last' cho sản phẩm thứ 5)
+    $args['columns'] = 5;
+
+    return $args;
+}
+add_filter( 'woocommerce_output_related_products_args', 'doAnCMS_change_related_products_args', 20 );
 
 // =======================
 // Khai báo các hỗ trợ của theme (Giữ nguyên)
